@@ -1,16 +1,35 @@
 const contents = document.querySelector(".contents");
 const home = document.querySelector(".home")
 
-let indexCache = []
-let searchCache = {}
 
+let indexCache = [];
+let searchCache = {};
+let currentData = [];
+
+function AppendSearch() {
+    // console.log(list)
+    let search_container = document.createElement("div")
+    search_container.className = "search_container"
+    let search = document.createElement("input")
+    search.className = "search"
+    search.addEventListener("input", Search)
+    let button = document.createElement("button")
+    button.className = "searchBtn"
+    button.textContent = "Search"
+    button.addEventListener("click", () => { Search(currentData) })
+    search_container.appendChild(search)
+    search_container.appendChild(button)
+    contents.appendChild(search_container)
+}
 
 function GetSearchData(id) {
     let list = document.createElement("ol")
     contents.textContent = "";
-    list.textContent = "";
+    // list.textContent = "";
+    AppendSearch(list);
     if (id in searchCache) {
         console.log("Using search cache...}")
+        currentData = searchCache[id]
         searchCache[id].forEach(element => {
             AppendResult(element, list)
         });
@@ -26,6 +45,7 @@ function GetSearchData(id) {
                 return response.json();
             })
             .then((body) => {
+                currentData = body.SearchDetails
                 searchCache[id] = body.SearchDetails
                 body.SearchDetails.forEach(element => {
                     AppendResult(element, list)
@@ -33,7 +53,6 @@ function GetSearchData(id) {
             })
             .catch(err => console.log(err))
     }
-
 }
 
 function AppendResult(element, list) {
@@ -80,5 +99,22 @@ function AppendData(element) {
     contents.appendChild(div)
 }
 
+function Search() {
+    const input = document.querySelector(".search")
+    let keyword = input.value;
+    let found = []
+    found = currentData.filter((element) => {
+        return element.Content.includes(keyword);
+    })
+    const ol = document.querySelector("ol")
+
+    ol.textContent = "";
+    found.forEach((ele) => {
+        AppendResult(ele, ol)
+    })
+
+}
 GetData()
 home.addEventListener("click", GetData)
+
+

@@ -87,3 +87,14 @@ a {
 li {
     max-width: 90ch;
 }
+
+.search_container {
+    display: flex;
+    justify-content: center;
+    min-width: 50%;
+    gap: .8rem;
+}
+
+.search_container button {
+    padding: .5em;
+}
