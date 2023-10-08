@@ -70,9 +70,13 @@ a {
 }
 
 .content:hover {
-    color: rgb(160, 32, 228);
+    color: rgb(172, 39, 243);
     transform: scale(105%);
     cursor: pointer;
+}
+
+.content:active {
+    color: rgb(172, 39, 243);
 }
 
 .home {
