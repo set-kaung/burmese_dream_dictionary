@@ -27,6 +27,7 @@ func (app *App) Search(rw http.ResponseWriter, r *http.Request) {
 	response := map[string][]*internals.DeatailSearchCache{}
 	response["SearchDetails"] = app.Data.DetailMap[i]
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	rw.Header().Set("Content-Type", "application/json")
 	encoder := json.NewEncoder(rw)
 	err = encoder.Encode(response)
 	if err != nil {
@@ -39,6 +40,7 @@ func (app *App) home(rw http.ResponseWriter, r *http.Request) {
 	response := map[string][]*internals.BlogHeader{}
 	response["Data"] = app.Data.Blogs
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	rw.Header().Set("Content-Type", "application/json")
 	err := encoder.Encode(response)
 	if err != nil {
 		http.Error(rw, "Server Error", 500)
