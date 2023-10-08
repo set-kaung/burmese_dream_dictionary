@@ -48,8 +48,20 @@ nav div {
 nav ul {
     padding: 0;
     display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 5rem;
+
     font-size: 1.65rem;
     max-width: 50%;
+}
+
+nav input {
+    padding: .3em;
+}
+
+nav button {
+    font-size: 1.05rem;
 }
 
 nav li {
@@ -97,4 +109,8 @@ li {
 
 .search_container button {
     padding: .5em;
+}
+
+.hidden {
+    display: none;
 }

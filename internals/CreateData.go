@@ -8,11 +8,6 @@ import (
 )
 
 func CreateDataFromJSON(data []byte) *Dream {
-	// data, err := os.ReadFile(filename)
-	// if err != nil {
-	// 	log.Fatalln("Error reading from file with - ", err)
-	// }
-	// log.Println(string(data[1:20]))
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	dream := &Dream{}
 	if err := decoder.Decode(dream); err != nil {
@@ -23,17 +18,19 @@ func CreateDataFromJSON(data []byte) *Dream {
 
 func (data *Data) Populate(filedata []byte) {
 	dream := CreateDataFromJSON(filedata)
-	detailMap := make(map[int][]*DeatailSearchCache)
+	detailMap := make(map[int][]*IndexSearchCache)
 	data.Blogs = dream.BlogHeader
+	data.SearchData = []string{}
 	for _, item := range dream.BlogDetail {
+		data.SearchData = append(data.SearchData, item.Content)
 		if _, ok := detailMap[item.BlogID]; ok {
 			arr := detailMap[item.BlogID]
-			detail := &DeatailSearchCache{BlogDetailID: item.ID, BlogContent: item.Content}
+			detail := &IndexSearchCache{BlogDetailID: item.ID, BlogContent: item.Content}
 			arr = append(arr, detail)
 			detailMap[item.BlogID] = arr
 		} else {
-			detail := &DeatailSearchCache{BlogDetailID: item.ID, BlogContent: item.Content}
-			arr := []*DeatailSearchCache{detail}
+			detail := &IndexSearchCache{BlogDetailID: item.ID, BlogContent: item.Content}
+			arr := []*IndexSearchCache{detail}
 			detailMap[item.BlogID] = arr
 		}
 	}

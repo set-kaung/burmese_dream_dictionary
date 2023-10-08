@@ -1,13 +1,13 @@
 const contents = document.querySelector(".contents");
-const home = document.querySelector(".home")
-
+const home = document.querySelector(".home");
+const search_query = document.querySelector("#search_query");
+const search_query_btn = document.querySelector(".search_query_btn");
 
 let indexCache = [];
 let searchCache = {};
 let currentData = [];
 
-function AppendSearch() {
-    // console.log(list)
+function AppendSearchToContents() {
     let search_container = document.createElement("div")
     search_container.className = "search_container"
     let search = document.createElement("input")
@@ -22,11 +22,41 @@ function AppendSearch() {
     contents.appendChild(search_container)
 }
 
-function GetSearchData(id) {
+function AppendResult(element, list) {
+    let li = document.createElement("li")
+    li.textContent = element.Content
+    list.appendChild(li)
+    contents.appendChild(list)
+}
+
+function AppendIndexData(element) {
+    let div = document.createElement("div")
+    div.id = `${element.BlogId}`
+    let p = document.createElement("p")
+    p.className = "content"
+    p.textContent = element.BlogTitle
+    p.addEventListener("click", () => {
+        GetSingleBlogData(element.BlogId)
+    })
+    div.appendChild(p)
+    contents.appendChild(div)
+}
+
+function AddSearchToNav(state) {
+    const search_box = document.querySelector(".search_box");
+    if (state == "index") {
+        search_box.classList.remove("hidden")
+    } else {
+        search_box.classList.add("hidden")
+    }
+}
+
+function GetSingleBlogData(id) {
     let list = document.createElement("ol")
     contents.textContent = "";
+    AddSearchToNav("none")
     // list.textContent = "";
-    AppendSearch(list);
+    AppendSearchToContents();
     if (id in searchCache) {
         console.log("Using search cache...}")
         currentData = searchCache[id]
@@ -55,15 +85,10 @@ function GetSearchData(id) {
     }
 }
 
-function AppendResult(element, list) {
-    let li = document.createElement("li")
-    li.textContent = element.Content
-    list.appendChild(li)
-    contents.appendChild(list)
-}
 
 
-function GetData() {
+function GetAllBlogs() {
+    AddSearchToNav("index")
     contents.textContent = "";
     if (indexCache.length == 0) {
         console.log("Fetching new data...")
@@ -76,28 +101,17 @@ function GetData() {
             }).then((body) => {
                 indexCache = body.Data
                 body.Data.forEach((element) => {
-                    AppendData(element)
+                    AppendIndexData(element)
                 })
             }).catch(err => console.log(err))
     } else {
         console.log("Using cache...")
         indexCache.forEach((element) => {
-            AppendData(element)
+            AppendIndexData(element)
         })
     }
 }
-function AppendData(element) {
-    let div = document.createElement("div")
-    div.id = `${element.BlogId}`
-    let p = document.createElement("p")
-    p.className = "content"
-    p.textContent = element.BlogTitle
-    p.addEventListener("click", () => {
-        GetSearchData(element.BlogId)
-    })
-    div.appendChild(p)
-    contents.appendChild(div)
-}
+
 
 function Search() {
     const input = document.querySelector(".search")
@@ -112,9 +126,46 @@ function Search() {
     found.forEach((ele) => {
         AppendResult(ele, ol)
     })
-
 }
-GetData()
-home.addEventListener("click", GetData)
+
+function SearchContents() {
+    if (search_query.value == "") {
+        return
+    }
+    let query = search_query.value;
+    const formData = new FormData();
+    formData.append("query", query);
+    fetch("http://localhost:6969/search/content", {
+        method: "POST",
+        body: formData,
+    })
+        .then((response) => response.json())
+        .then((response_data) => {
+            contents.textContent = ""
+            const ol = document.createElement("ol")
+            contents.appendChild(ol)
+
+            response_data.data.forEach((content) => {
+                if (content.includes(query)) {
+                    let li = document.createElement("li");
+                    li.textContent = content;
+                    ol.appendChild(li);
+                }
+            })
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+
+function CleanSearchQuery() {
+    if (search_query.value == "") {
+        GetAllBlogs();
+    }
+}
 
 
+GetAllBlogs()
+home.addEventListener("click", GetAllBlogs)
+search_query_btn.addEventListener("click", SearchContents)
+search_query.addEventListener("input", CleanSearchQuery)

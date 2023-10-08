@@ -1,8 +1,9 @@
 package internals
 
 type Data struct {
-	Blogs     []*BlogHeader
-	DetailMap map[int][]*DeatailSearchCache
+	Blogs      []*BlogHeader
+	DetailMap  map[int][]*IndexSearchCache
+	SearchData []string
 }
 
 type Dream struct {
@@ -21,7 +22,7 @@ type BlogHeader struct {
 	BlogTitle string `json:"BlogTitle"`
 }
 
-type DeatailSearchCache struct {
+type IndexSearchCache struct {
 	BlogDetailID int    `json:"DetailID"`
 	BlogContent  string `json:"Content"`
 }
