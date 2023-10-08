@@ -18,7 +18,7 @@ type Detail struct {
 
 type BlogHeader struct {
 	BlogId    int    `json:"BlogId"`
-	BlogTitle string `json"BlogTitle"`
+	BlogTitle string `json:"BlogTitle"`
 }
 
 type DeatailSearchCache struct {
