@@ -2,17 +2,15 @@ package main
 
 import (
 	"dream_dictionary/internals"
+	_ "embed"
 	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
 )
 
-// func ForEach[T any](items []T, fn func(T)) {
-// 	for _, item := range items {
-// 		fn(item)
-// 	}
-// }
+//go:embed data/DreamDictionary.json
+var file_data []byte
 
 type App struct {
 	*internals.Data
@@ -49,7 +47,7 @@ func (app *App) home(rw http.ResponseWriter, r *http.Request) {
 
 func main() {
 	data := &internals.Data{}
-	data.Populate("./data/DreamDictionary.json")
+	data.Populate(file_data)
 	app := &App{Data: data}
 
 	mux := http.NewServeMux()

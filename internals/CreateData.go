@@ -1,27 +1,27 @@
 package internals
 
 import (
+	_ "embed"
 	"encoding/json"
 	"log"
-	"os"
 )
 
-func CreateDataFromJSON(filename string) *Dream {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		log.Fatalln("Error reading from file with - ", err)
-	}
+func CreateDataFromJSON(data []byte) *Dream {
+	// data, err := os.ReadFile(filename)
+	// if err != nil {
+	// 	log.Fatalln("Error reading from file with - ", err)
+	// }
 	// log.Println(string(data[1:20]))
 	dream := &Dream{}
-	err = json.Unmarshal(data, dream)
+	err := json.Unmarshal(data, dream)
 	if err != nil {
 		log.Fatalln("error unmarshalling json:", err)
 	}
 	return dream
 }
 
-func (data *Data) Populate(filename string) {
-	dream := CreateDataFromJSON(filename)
+func (data *Data) Populate(filedata []byte) {
+	dream := CreateDataFromJSON(filedata)
 	detailMap := map[int][]*DeatailSearchCache{}
 	data.Blogs = dream.BlogHeader
 	for _, item := range dream.BlogDetail {
