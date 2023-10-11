@@ -5,6 +5,7 @@ const search_query_btn = document.querySelector(".search_query_btn");
 
 let indexCache = [];
 let searchCache = {};
+//to hold single letter related search results
 let currentData = [];
 
 function AppendSearchToContents() {

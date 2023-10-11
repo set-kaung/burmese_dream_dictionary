@@ -36,6 +36,7 @@ func (app *App) SearchContent(rw http.ResponseWriter, r *http.Request) {
 
 func (app *App) SearchIndex(rw http.ResponseWriter, r *http.Request) {
 	// var builder strings.Builder
+
 	index := r.URL.Query().Get("id")
 	i, err := strconv.Atoi(index)
 	if err != nil {
@@ -54,6 +55,7 @@ func (app *App) SearchIndex(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) home(rw http.ResponseWriter, r *http.Request) {
+
 	encoder := json.NewEncoder(rw)
 	response := map[string][]*internals.BlogHeader{}
 	response["Data"] = app.Data.Blogs
