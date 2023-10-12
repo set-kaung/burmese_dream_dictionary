@@ -1,7 +1,7 @@
+"use strict";
 const contents = document.querySelector(".contents");
 const home = document.querySelector(".home");
-const search_query = document.querySelector("#search_query");
-const search_query_btn = document.querySelector(".search_query_btn");
+const search_form = document.querySelector(".search_form")
 
 let indexCache = [];
 let searchCache = {};
@@ -26,6 +26,7 @@ function AppendSearchToContents() {
 function AppendResult(element, list) {
     let li = document.createElement("li")
     li.textContent = element.Content
+    li.classList.add("fade-in")
     list.appendChild(li)
     contents.appendChild(list)
 }
@@ -44,11 +45,11 @@ function AppendIndexData(element) {
 }
 
 function AddSearchToNav(state) {
-    const search_box = document.querySelector(".search_box");
+    const search_form = document.querySelector(".search_form")
     if (state == "index") {
-        search_box.classList.remove("hidden")
+        search_form.classList.remove("hidden")
     } else {
-        search_box.classList.add("hidden")
+        search_form.classList.add("hidden")
     }
 }
 
@@ -88,7 +89,7 @@ function GetSingleBlogData(id) {
 
 
 
-function GetAllBlogs() {
+function GetAllBlogs(indexCache) {
     AddSearchToNav("index")
     contents.textContent = "";
     if (indexCache.length == 0) {
@@ -100,6 +101,7 @@ function GetAllBlogs() {
                 }
                 return response.json();
             }).then((body) => {
+
                 indexCache = body.Data
                 body.Data.forEach((element) => {
                     AppendIndexData(element)
@@ -107,6 +109,7 @@ function GetAllBlogs() {
             }).catch(err => console.log(err))
     } else {
         console.log("Using cache...")
+        console.log(indexCache)
         indexCache.forEach((element) => {
             AppendIndexData(element)
         })
@@ -129,44 +132,43 @@ function Search() {
     })
 }
 
-function SearchContents() {
-    if (search_query.value == "") {
-        return
-    }
-    let query = search_query.value;
-    const formData = new FormData();
-    formData.append("query", query);
+function SearchContents(e) {
+    e.preventDefault();
+    const formData = new FormData(search_form);
     fetch("http://localhost:6969/search/content", {
         method: "POST",
-        body: formData,
+        mode: 'cors',
+        body: formData
     })
-        .then((response) => response.json())
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json(); // Parse the response as JSON
+        })
         .then((response_data) => {
-            contents.textContent = ""
-            const ol = document.createElement("ol")
-            contents.appendChild(ol)
+            console.log(response_data.data)
+            if (response_data.data.length == 0) {
+                contents.textContent = "There is nothing to see here..."
+                return
+            }
+            contents.textContent = "";
+            const ol = document.createElement("ol");
+            contents.appendChild(ol);
 
             response_data.data.forEach((content) => {
-                if (content.includes(query)) {
-                    let li = document.createElement("li");
-                    li.textContent = content;
-                    ol.appendChild(li);
-                }
-            })
+                let li = document.createElement("li");
+                li.classList.add("fade-in");
+                li.textContent = content;
+                ol.appendChild(li);
+            });
         })
         .catch((error) => {
-            console.log(error);
+            console.error(error.message);
         });
 }
 
-function CleanSearchQuery() {
-    if (search_query.value == "") {
-        GetAllBlogs();
-    }
-}
 
-
-GetAllBlogs()
-home.addEventListener("click", GetAllBlogs)
-search_query_btn.addEventListener("click", SearchContents)
-search_query.addEventListener("input", CleanSearchQuery)
+home.addEventListener("click", () => { GetAllBlogs(indexCache) })
+search_form.addEventListener("submit", (e) => { SearchContents(e) })
+GetAllBlogs(indexCache)

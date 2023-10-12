@@ -56,13 +56,13 @@ nav ul {
     max-width: 50%;
 }
 
-nav input {
-    padding: .3em;
+form input,
+form button {
+    padding: .5rem;
+    font-size: 1rem;
 }
 
-nav button {
-    font-size: 1.05rem;
-}
+
 
 nav li {
     list-style: none;
@@ -73,12 +73,16 @@ a {
     color: white;
 }
 
+
+
 .contents {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2em;
-    margin-top: 10rem;
+    padding: .5em 10em;
+    margin-top: 12rem;
+    border: 1px solid rgb(51, 51, 51);
+    font-size: 1.25rem;
 }
 
 .content:hover {
@@ -96,8 +100,15 @@ a {
     color: white;
 }
 
-li {
-    max-width: 90ch;
+.contents li {
+    max-width: 92ch;
+    opacity: 0;
+    animation: fadeIn 1s;
+    -webkit-animation: fadeIn 1s;
+    -moz-animation: fadeIn 1s;
+    -o-animation: fadeIn 1s;
+    -ms-animation: fadeIn 1s;
+
 }
 
 .search_container {
@@ -107,10 +118,29 @@ li {
     gap: .8rem;
 }
 
+.contents li.fade-in {
+    opacity: 1;
+}
+
 .search_container button {
     padding: .5em;
 }
 
+.search_container input {
+    padding: .3rem;
+    font-size: 1.35rem;
+}
+
 .hidden {
     display: none;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
