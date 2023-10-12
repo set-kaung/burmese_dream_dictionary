@@ -5,7 +5,14 @@ import (
 	_ "embed"
 	"encoding/json"
 	"log"
+	"strings"
 )
+
+//go:embed data/accents.txt
+var accents string
+
+//go:embed data/DreamDictionary.json
+var file_data []byte
 
 func CreateDataFromJSON(data []byte) *Dream {
 	decoder := json.NewDecoder(bytes.NewReader(data))
@@ -16,8 +23,8 @@ func CreateDataFromJSON(data []byte) *Dream {
 	return dream
 }
 
-func (data *Data) Populate(filedata []byte) {
-	dream := CreateDataFromJSON(filedata)
+func (data *Data) Populate() {
+	dream := CreateDataFromJSON(file_data)
 	detailMap := make(map[int][]*IndexSearchCache)
 	data.Blogs = dream.BlogHeader
 	data.SearchData = []string{}
@@ -35,4 +42,13 @@ func (data *Data) Populate(filedata []byte) {
 		}
 	}
 	data.DetailMap = detailMap
+	CreateAccentsMap(data)
+}
+
+func CreateAccentsMap(data *Data) {
+	strs := strings.Split(accents, "\n")
+	data.Accents = make(map[string]bool)
+	for _, i := range strs {
+		data.Accents[i] = true
+	}
 }

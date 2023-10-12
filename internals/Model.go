@@ -4,6 +4,7 @@ type Data struct {
 	Blogs      []*BlogHeader
 	DetailMap  map[int][]*IndexSearchCache
 	SearchData []string
+	Accents    map[string]bool
 }
 
 type Dream struct {
