@@ -3,6 +3,16 @@ body {
     margin: 0;
 }
 
+
+
+form input:focus {
+    box-shadow: 2px 2px 5px solid #99c3f3;
+    outline: none;
+    outline: 4px solid rgb(1, 175, 255);
+    outline-offset: 1px;
+}
+
+
 .main {
     min-width: 100%;
     min-height: 100%;
@@ -21,14 +31,13 @@ nav {
     min-width: 100%;
     display: flex;
     justify-content: space-between;
-    background-color: rgb(57, 112, 215);
+    background-color: #3A80D1;
     font-size: 1rem;
 }
 
 nav div {
-    max-width: 1rem;
-    background-color: rgb(221, 221, 221);
-    min-width: 1rem;
+    background-color: #3366a0;
+    min-width: 3rem;
 }
 
 .heading {
@@ -36,13 +45,13 @@ nav div {
     flex-direction: column;
     position: fixed;
     width: 100%;
-    background-color: white;
+    background-color: #ffda34;
     min-height: 10rem;
 }
 
 .heading h1 {
     text-align: center;
-    background-color: white;
+    color: #0035a7;
 }
 
 nav ul {
@@ -56,11 +65,39 @@ nav ul {
     max-width: 50%;
 }
 
-form input,
-form button {
-    padding: .5rem;
-    font-size: 1rem;
+form {
+    display: flex;
+    gap: .5rem;
 }
+
+form input {
+    padding: .8rem;
+    font-size: 1rem;
+    border-radius: 3px;
+    border-width: 0;
+}
+
+form button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #d8eafffc;
+    border: none;
+    border-radius: 5px;
+    aspect-ratio: 1/1;
+    padding: 0.7rem;
+}
+
+button .material-symbols-outlined {
+    font-size: 1.75rem;
+}
+
+li .material-symbols-outlined {
+    font-size: 3rem;
+}
+
+
 
 
 
@@ -73,31 +110,34 @@ a {
     color: white;
 }
 
+.contents:empty {
+    display: none;
+}
 
 
 .contents {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: .5em 10em;
+    padding: .5em 5em;
     margin-top: 12rem;
     border: 1px solid rgb(51, 51, 51);
     font-size: 1.25rem;
 }
 
 .content:hover {
-    color: rgb(172, 39, 243);
+    color: #D13A80;
     transform: scale(105%);
     cursor: pointer;
 }
 
 .content:active {
-    color: rgb(172, 39, 243);
+    color: #D13A80;
 }
 
 .home {
     cursor: pointer;
-    color: white;
+    color: rgb(205, 229, 255)
 }
 
 .contents li {
@@ -131,6 +171,10 @@ a {
     font-size: 1.35rem;
 }
 
+
+
+
+
 .hidden {
     display: none;
 }
@@ -142,5 +186,102 @@ a {
 
     100% {
         opacity: 1;
+    }
+}
+
+@media (width < 800px) {
+
+    .contents li {
+        max-width: 30ch;
+        font-size: 1rem;
+    }
+
+    .content p {
+        font-size: .75rem;
+        max-width: 20ch;
+        word-wrap: break-word;
+    }
+
+    .contents {
+        margin-top: 23dvh;
+        padding: 1em;
+    }
+
+    .heading ul {
+        font-size: 1rem;
+
+    }
+
+    .heading h1 {
+        padding: .5rem;
+    }
+
+    nav {
+        max-width: 100dvh;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    nav div {
+        display: none;
+    }
+
+    form input {
+        padding: .3rem;
+        max-width: 30ch;
+        font-size: .8rem;
+    }
+
+    .contents input {
+        padding: .3rem;
+        max-width: 30ch;
+        font-size: .8rem;
+    }
+
+    li .material-symbols-outlined {
+        font-size: 2rem;
+    }
+
+    button .material-symbols-outlined {
+        font-size: 1.25rem;
+    }
+
+    .heading {
+        max-height: 5dvh;
+    }
+}
+
+@media (width < 400px) {
+    .heading {
+        max-height: 10dvh;
+    }
+
+    nav {
+        align-items: center;
+        justify-content: center;
+    }
+
+    nav form>* {
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    nav form input {
+        max-width: 30ch;
+    }
+
+    .heading nav ul {
+        gap: .5rem;
+    }
+
+    .contents {
+        margin-top: 30dvh;
+        font-size: .9rem;
+    }
+
+    p,
+    li {
+        max-width: 30ch;
+        word-wrap: break-word;
     }
 }
