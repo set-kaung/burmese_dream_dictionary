@@ -3,8 +3,12 @@ const contents = document.querySelector(".contents");
 const home = document.querySelector(".home");
 const search_form = document.querySelector(".search_form")
 
+const serverURL = "http://localhost:8081"
+
+let currentID = 0;
+
 let indexCache = [];
-let searchCache = {};
+let searchCache = [];
 //to hold single letter related search results
 let currentData = [];
 
@@ -25,7 +29,7 @@ function AppendSearchToContents() {
 
 function AppendResult(element, list) {
     let li = document.createElement("li")
-    li.textContent = element.Content
+    li.textContent = element
     li.classList.add("fade-in")
     list.appendChild(li)
     contents.appendChild(list)
@@ -54,6 +58,7 @@ function AddSearchToNav(state) {
 }
 
 function GetSingleBlogData(id) {
+    currentID = id
     let list = document.createElement("ol")
     contents.textContent = "";
     AddSearchToNav("none")
@@ -67,7 +72,7 @@ function GetSingleBlogData(id) {
         });
     } else {
         console.log("Fetching new data...")
-        const link = `http://localhost:6969/search?id=${id}`
+        const link = `${serverURL}/search?id=${id}`
         console.log(`get search called with ${link} `)
         fetch(link)
             .then((response) => {
@@ -92,9 +97,10 @@ function GetSingleBlogData(id) {
 function GetAllBlogs(indexCache) {
     AddSearchToNav("index")
     contents.textContent = "";
+    const link = `${serverURL}/`
     if (indexCache.length == 0) {
         console.log("Fetching new data...")
-        fetch("http://localhost:6969/")
+        fetch(link, { mode: 'cors' })
             .then((response) => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -119,23 +125,30 @@ function GetAllBlogs(indexCache) {
 
 function Search() {
     const input = document.querySelector(".search")
-    let keyword = input.value;
-    let found = []
-    found = currentData.filter((element) => {
-        return element.Content.includes(keyword);
-    })
-    const ol = document.querySelector("ol")
+    let query = input.value;
+    const link = `${serverURL}/search/index?id=${currentID}&query=${query}`
+    fetch(link).then((response) => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    }).then((body) => {
+        console.log(body.data)
+        const ol = document.querySelector("ol")
+        ol.textContent = "";
+        body.data.forEach((ele) => {
+            console.log(ele)
+            AppendResult(ele, ol)
+        })
+    }).catch(err => console.log(err))
 
-    ol.textContent = "";
-    found.forEach((ele) => {
-        AppendResult(ele, ol)
-    })
 }
 
 function SearchContents(e) {
     e.preventDefault();
+    const link = `${serverURL}/search/content`
     const formData = new FormData(search_form);
-    fetch("http://localhost:6969/search/content", {
+    fetch(link, {
         method: "POST",
         mode: 'cors',
         body: formData

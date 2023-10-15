@@ -50,7 +50,7 @@ func (app *App) SearchIndex(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 	}
 	// data := app.Data.DetailMap[i]
-	response := map[string][]*internals.IndexSearchCache{}
+	response := map[string][]string{}
 	response["SearchDetails"] = app.Data.DetailMap[i]
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
 	rw.Header().Set("Content-Type", "application/json")
@@ -60,6 +60,26 @@ func (app *App) SearchIndex(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Server Error", 500)
 	}
 	log.Printf("took %s to respond from /search.\n", time.Since(start).String())
+}
+
+func (app *App) BlogInternalSearch(rw http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	encoder := json.NewEncoder(rw)
+	index := r.URL.Query().Get("id")
+	query := r.URL.Query().Get("query")
+	i, err := strconv.Atoi(index)
+	if err != nil {
+		http.Error(rw, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	}
+	response := map[string][]string{}
+	response["data"] = SearchBlogContents(app.Data, app.Data.DetailMap[i], query)
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	rw.Header().Set("Content-Type", "application/json")
+	err = encoder.Encode(response)
+	if err != nil {
+		http.Error(rw, "Server Error", 500)
+	}
+	log.Printf("took %s to respond from /search/index.\n", time.Since(start).String())
 }
 
 func (app *App) Home(rw http.ResponseWriter, r *http.Request) {
@@ -84,8 +104,9 @@ func main() {
 	mux.Handle("/search", http.HandlerFunc(app.SearchIndex))
 	mux.Handle("/", http.HandlerFunc(app.Home))
 	mux.Handle("/search/content", http.HandlerFunc(app.SearchContent))
-	log.Println("Listening on :6969")
-	err := http.ListenAndServe(":6969", mux)
+	mux.Handle("/search/index", http.HandlerFunc(app.BlogInternalSearch))
+	log.Println("Listening on :8081")
+	err := http.ListenAndServe(":8081", mux)
 	if err != nil {
 		log.Println("Failed to start server:", err)
 	}
