@@ -4,6 +4,7 @@ import (
 	"dream_dictionary/internals"
 	"log"
 	"strings"
+	"sync"
 )
 
 const (
@@ -37,8 +38,9 @@ func SearchBlogContents(data *internals.Data, searchStrings []string, query stri
 		str = strings.ReplaceAll(str, " ", "")
 		if strings.Contains(str, query) {
 			found = append(found, str)
-			if IsWordExact(data, query, str) {
-				exacts = append(exacts, str)
+			ok, result := IsWordExact(data, query, str)
+			if ok {
+				exacts = append(exacts, result)
 			}
 		}
 	}
@@ -55,6 +57,7 @@ func SearchContent(data *internals.Data, query string) []string {
 	if query == "" {
 		return []string{}
 	}
+	wg := &sync.WaitGroup{}
 	found := []string{}
 	exacts := []string{}
 	for _, str := range data.SearchData {
@@ -62,40 +65,69 @@ func SearchContent(data *internals.Data, query string) []string {
 		str = strings.ReplaceAll(str, " ", "")
 		if strings.Contains(str, query) {
 			found = append(found, str)
-			if IsWordExact(data, query, str) {
-				exacts = append(exacts, str)
-			}
+			wg.Add(1)
+			go func(s string) {
+				defer wg.Done()
+				ok, result := IsWordExact(data, query, s)
+				if ok {
+					exacts = append(exacts, result)
+				}
+			}(str)
+
 		}
 	}
+	wg.Wait()
 
 	if len(exacts) > 0 {
-		log.Println("Found exacts.")
+		// log.Println("Found exacts.")
 		return exacts
 	}
-	log.Println("Found contains.")
+	// log.Println("Found contains.")
 	return found
 }
 
-func IsExact(data *internals.Data, query, source string) bool {
-	idx := strings.Index(source, query)
-	last_c_start, last_c_end := idx+len(query), idx+len(query)+3
-	if last_c_end > len(source) {
-		return true
-	} else {
-		if IsParticle(data, source[last_c_start:last_c_end]) {
-			return false
-		} else {
-			return true
+func IsWordExact(data *internals.Data, query, source string) (bool, string) {
+	sRunes := []rune(source)
+	qRunes := []rune(query)
+	sWords := map[string][]int{}
+	qWords := map[string][]int{}
+	//individual words of the source string
+	sWords = SplitIntoWords(data.Diacritics_Map, sWords, sRunes)
+	//individual words of the query string
+	qWords = SplitIntoWords(data.Diacritics_Map, qWords, qRunes)
+
+	totalQueryWords := 0
+	for _, v := range qWords {
+		totalQueryWords += len(v)
+	}
+	//need to fix this
+	qWordIndices := make([]string, totalQueryWords)
+	for k, v := range qWords {
+		for _, i := range v {
+			qWordIndices[i] = k
 		}
 	}
-}
-
-func IsWordExact(data *internals.Data, query, source string) bool {
-	sRunes := []rune(source)
-	words := map[string]bool{}
-	words = SplitIntoWords(data.Diacritics_Map, words, sRunes)
-	_, ok := words[query]
-	return ok
+	appearsInOrder := false
+	if len(qWordIndices) == 1 {
+		_, appearsInOrder = sWords[qWordIndices[0]]
+	} else {
+		for i := 1; i < len(qWordIndices); i++ {
+			firstArr := sWords[qWordIndices[i-1]]
+			secondArr := sWords[qWordIndices[i]]
+			for _, f := range firstArr {
+				for _, s := range secondArr {
+					if s-f == 1 {
+						appearsInOrder = true
+						break
+					}
+				}
+			}
+			if !appearsInOrder {
+				break
+			}
+		}
+	}
+	return appearsInOrder, source
 }
 
 func IsParticle(data *internals.Data, next_char string) bool {
@@ -105,7 +137,8 @@ func IsParticle(data *internals.Data, next_char string) bool {
 	return false
 }
 
-func SplitIntoWords(diacritics_map map[rune]string, words map[string]bool, sRunes []rune) map[string]bool {
+func SplitIntoWords(diacritics_map map[rune]string, words map[string][]int, sRunes []rune) map[string][]int {
+	index := 0
 	builder := strings.Builder{}
 	var nextRune rune
 	for i := 0; i < len(sRunes); i++ {
@@ -127,16 +160,23 @@ func SplitIntoWords(diacritics_map map[rune]string, words map[string]bool, sRune
 			if r != VIRAMA {
 				if _, ok = diacritics_map[nextRune]; !ok {
 					builder.WriteRune(r)
-					//we check if the next rune is
-					//something like တ်
 					if i+2 <= len(sRunes)-1 {
+						//we check if the next rune is
+						//something like တ်
 						//if it is, then current word in the buffer is
 						//something like နတ်
 						n2 := sRunes[i+2]
 						if n2 == ASAT || n2 == DOT_BELOW {
 							continue
 						}
-						words[builder.String()] = true
+						word := builder.String()
+						if arr, ok := words[word]; ok {
+							arr = append(arr, index)
+							words[word] = arr
+						} else {
+							words[word] = []int{index}
+						}
+						index++
 						builder.Reset()
 						continue
 					}
@@ -159,7 +199,14 @@ func SplitIntoWords(diacritics_map map[rune]string, words map[string]bool, sRune
 					continue
 				}
 			}
-			words[builder.String()] = true
+			word := builder.String()
+			if arr, ok := words[word]; ok {
+				arr = append(arr, index)
+				words[word] = arr
+			} else {
+				words[word] = []int{index}
+			}
+			index++
 			builder.Reset()
 		}
 	}

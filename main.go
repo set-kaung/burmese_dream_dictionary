@@ -4,7 +4,6 @@ import (
 	"dream_dictionary/internals"
 	_ "embed"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -28,9 +27,10 @@ func (app *App) SearchContent(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Malformed Request", http.StatusBadRequest)
 		return
 	}
-	fmt.Println(r.PostForm)
+	query := r.PostForm.Get("query")
+	log.Printf("Searching for `%s` in all contents.\n", query)
 	response := map[string][]string{}
-	response["data"] = SearchContent(app.Data, r.PostForm.Get("query"))
+	response["data"] = SearchContent(app.Data, query)
 	rw.Header().Set("Access-Control-Allow-Origin", "http://127.0.0.1:5500")
 	rw.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	rw.Header().Set("Content-Type", "application/json")
@@ -98,6 +98,7 @@ func (app *App) Home(rw http.ResponseWriter, r *http.Request) {
 func main() {
 	data := &internals.Data{}
 	data.Populate()
+
 	app := &App{Data: data}
 
 	mux := http.NewServeMux()
