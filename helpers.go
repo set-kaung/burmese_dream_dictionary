@@ -69,10 +69,6 @@ func SearchContent(data *internals.Data, query string) []string {
 }
 
 func IsWordExact(data *internals.Data, query, source string) (bool, string) {
-	// sRunes := []rune(source)
-	// qRunes := []rune(query)
-	// sWords := map[string][]int{}
-	// qWords := map[string][]int{}
 	//individual words of the source string
 	sWords, _ := blitter.Splitter(source)
 	//individual words of the query string
