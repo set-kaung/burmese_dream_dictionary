@@ -14,10 +14,6 @@ type App struct {
 	*internals.Data
 }
 
-type requestJSON struct {
-	Query string
-}
-
 func (app *App) SearchContent(rw http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	encoder := json.NewEncoder(rw)
