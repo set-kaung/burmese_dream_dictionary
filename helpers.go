@@ -13,6 +13,7 @@ func SearchBlogContents(data *internals.Data, searchStrings []string, query stri
 	if query == "" {
 		return []string{}
 	}
+
 	found := []string{}
 	exacts := []string{}
 	for _, str := range searchStrings {
@@ -31,10 +32,12 @@ func SearchBlogContents(data *internals.Data, searchStrings []string, query stri
 		log.Println("Found exacts.")
 		return exacts
 	}
+	// if can't find exact match, return closet matches
 	log.Println("Found contains.")
 	return found
 }
 
+// need to update this with a worker pool
 func SearchContent(data *internals.Data, query string) []string {
 	if query == "" {
 		return []string{}
@@ -61,37 +64,34 @@ func SearchContent(data *internals.Data, query string) []string {
 	wg.Wait()
 
 	if len(exacts) > 0 {
-		// log.Println("Found exacts.")
 		return exacts
 	}
-	// log.Println("Found contains.")
 	return found
 }
 
+// code to find the exact appearance of the target word
+// we are searching for
 func IsWordExact(data *internals.Data, query, source string) (bool, string) {
 	//individual words of the source string
 	sWords, _ := blitter.Splitter(source)
 	//individual words of the query string
-	qWords, _ := blitter.Splitter(query)
+	qWords, totalQueryWords := blitter.Splitter(query)
 
-	totalQueryWords := 0
-	for _, v := range qWords {
-		totalQueryWords += len(v)
-	}
 	//need to fix this
-	qWordIndices := make([]string, totalQueryWords)
+	queryWordIndices := make([]string, totalQueryWords)
 	for k, v := range qWords {
 		for _, i := range v {
-			qWordIndices[i] = k
+			queryWordIndices[i] = k
 		}
 	}
+
 	appearsInOrder := false
-	if len(qWordIndices) == 1 {
-		_, appearsInOrder = sWords[qWordIndices[0]]
+	if len(queryWordIndices) == 1 {
+		_, appearsInOrder = sWords[queryWordIndices[0]]
 	} else {
-		for i := 1; i < len(qWordIndices); i++ {
-			firstArr := sWords[qWordIndices[i-1]]
-			secondArr := sWords[qWordIndices[i]]
+		for i := 1; i < len(queryWordIndices); i++ {
+			firstArr := sWords[queryWordIndices[i-1]]
+			secondArr := sWords[queryWordIndices[i]]
 			for _, f := range firstArr {
 				for _, s := range secondArr {
 					if s-f == 1 {
